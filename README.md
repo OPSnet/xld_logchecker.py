@@ -1,6 +1,14 @@
-# XLD Log Signer
+# XLD Logchecker
 
-Based heavily on [barrybingo/xld_sign](https://github.com/barrybingo/xld_sign). This is a complete disassembly of the XLD log signing algorithm, re-implemented in Python 3.6+. Includes an option to fix those pesky edited logs.
+![Travis-CI Status](https://img.shields.io/travis/com/OPSnet/xld_logchecker.py/master.svg) 
+![PyPI](https://img.shields.io/pypi/v/xld_logchecker.svg)
+
+This is a fork of https://github.com/puddly/xld_logsigner, to be used within our 
+downstream applications, removing unnecessary functionality that we do not need. 
+
+Based heavily on [barrybingo/xld_sign](https://github.com/barrybingo/xld_sign).
+This is a complete disassembly of the XLD log signing algorithm, re-implemented in
+Python 3.5+.
 
 # Usage
 

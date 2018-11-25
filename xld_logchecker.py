@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import sys
 import base64
 import argparse
+from pathlib import Path
+import sys
 
 
 LOGCHECKER_MIN_VERSION = '20121027'
@@ -10,6 +11,7 @@ LOGCHECKER_MIN_VERSION = '20121027'
 
 def rotate_left(n, k):
     return ((n << k) & 0xFFFFFFFF) | (n >> (32 - k))
+
 
 def rotate_right(n, k):
     return rotate_left(n, 32 - k)
@@ -166,42 +168,37 @@ def xld_verify(data):
     return data, version, old_signature, signature
 
 
-if __name__ == '__main__':
+def parse_log(arg_file):
+    if not isinstance(arg_file, Path):
+        arg_file = Path(arg_file)
+
+    if not arg_file.exists():
+        return {'message': 'error: cannot open file', 'status': 'ERROR'}
+
+    try:
+        with arg_file.open(encoding='utf-8') as handle:
+            data, version, old_signature, actual_signature = xld_verify(handle.read())
+    except UnicodeDecodeError:
+        return {'message': 'Not a logfile', 'status': 'ERROR'}
+
+    if old_signature is None:
+        return {'message': 'Not a logfile', 'status': 'ERROR'}
+    elif old_signature != actual_signature:
+        return {'message': 'Malformed', 'status': 'BAD'}
+    elif version <= LOGCHECKER_MIN_VERSION:
+        return {'message': 'Forged', 'status': 'BAD'}
+    return {'message': 'OK', 'status': 'OK'}
+
+
+def main():
     parser = argparse.ArgumentParser(description='Verifies and resigns XLD logs')
+    parser.add_argument('--json', action='store_true', help='output results as json')
     parser.add_argument('file', metavar='FILE', help='path to the log file')
-
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--verify', action='store_true', help='verify a log')
-    group.add_argument('--sign', action='store_true', help='sign or fix an existing log')
-
     args = parser.parse_args()
+    msg = parse_log(args.file)
 
-    if args.file == '-':
-        handle = sys.stdin
-    else:
-        handle = open(args.file, 'rb')
+    print(msg if args.json else msg['message'])
+    sys.exit(0 if msg['status'] == 'OK' else 1)
 
-    data, version, old_signature, actual_signature = xld_verify(handle.read().decode('utf-8'))
-    handle.close()
-
-    if args.sign:
-        if version <= LOGCHECKER_MIN_VERSION:
-            raise ValueError('XLD version was too old to be signed')
-
-        print(data)
-        print('-----BEGIN XLD SIGNATURE-----')
-        print(actual_signature)
-        print('-----END XLD SIGNATURE-----')
-
-    if args.verify:
-        if old_signature is None:
-            print('Not a log file')
-            sys.exit(1)
-        elif old_signature != actual_signature:
-            print('Malformed')
-            sys.exit(1)
-        elif version <= LOGCHECKER_MIN_VERSION:
-            print('Forged')
-            sys.exit(1)
-        else:
-            print('OK')
+if __name__ == '__main__':
+    main()
