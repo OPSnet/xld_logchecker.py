@@ -17,12 +17,22 @@ TESTS = [
 ]
 
 
-class TestLogchecker(unittest.TestCase):
-    def test_logs(self):
-        for log_file, expected in TESTS:
-            with self.subTest(log=str(log_file)):
-                actual = xld_logchecker.parse_log(log_file)
-                self.assertEqual(expected, actual)
+def make_test(log_file, expected):
+    def test(self):
+        actual = xld_logchecker.parse_log(log_file)
+        self.assertEqual(expected, actual)
+
+    return test
+
+
+TestLogchecker = type(
+    "TestLogchecker",
+    (unittest.TestCase,),
+    {
+        f"test_{log_file.stem}": make_test(log_file, expected)
+        for log_file, expected in TESTS
+    },
+)
 
 
 if __name__ == "__main__":
