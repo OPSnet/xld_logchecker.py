@@ -14,6 +14,10 @@ TESTS = [
     (Path("logs/02.log"), {"message": "OK", "status": "OK"}),
     (Path("logs/03.log"), {"message": "Malformed", "status": "BAD"}),
     (Path("logs/04.log"), {"message": "Not a logfile", "status": "ERROR"}),
+    (Path("logs/05.log"), {"message": "OK", "status": "OK"}),
+    (Path("logs/06.log"), {"message": "OK", "status": "OK"}),
+    (Path("logs/07.log"), {"message": "Not a logfile", "status": "ERROR"}),
+    (Path("logs/08.log"), {"message": "OK", "status": "OK"}),
 ]
 
 

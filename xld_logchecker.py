@@ -270,7 +270,7 @@ def parse_log(arg_file):
         return {"message": "error: cannot open file", "status": "ERROR"}
 
     try:
-        with arg_file.open(encoding="utf-8") as handle:
+        with arg_file.open(encoding="utf-8", newline="") as handle:
             data, version, old_signature, actual_signature = xld_verify(handle.read())
     except UnicodeDecodeError:
         return {"message": "Not a logfile", "status": "ERROR"}
